@@ -6,31 +6,31 @@ Voorbeeld voor Project I
 1. Packages installeren
 ```console 
 me@my-rpi:~ $ sudo apt update 
-me@my-rpi:~ $ ssudo apt install -y python3-venv python3-pip python3-mysqldb mariadb-server uwsgi nginx uwsgi-plugin-python3 rabbitmq-server
+me@my-rpi:~ $ sudo apt install -y python3-venv python3-pip python3-mysqldb mariadb-server uwsgi nginx uwsgi-plugin-python3 rabbitmq-server
 ```
 
 > Vervang als je wil mariadb-server door mysql-server. In wat volgt moet je dan ook telkens mariadb vervangen door mysql.
 
-1. Database setup
+2. Database setup
 ```console 
 me@my-rpi:~ $ sudo mariadb
 ```
 	1. Users aanmaken
-		```mysql
-		CREATE USER 'project1-admin'@'localhost' IDENTIFIED BY 'adminpassword';
-		CREATE USER 'project1-web'@'localhost' IDENTIFIED BY 'webpassword';
-		CREATE USER 'project1-sensor'@'localhost' IDENTIFIED BY 'sensorpassword';
-		```
-	1. Database aanmaken & rechten toekennen
-		```mysql
-		CREATE DATABASE project1;
-		GRANT ALL PRIVILEGES ON project1.* to 'project1-admin'@'localhost' WITH GRANT OPTION;
-		GRANT SELECT, INSERT, UPDATE, DELETE ON project1.* TO 'project1-web'@'localhost';
-		GRANT SELECT, INSERT, UPDATE, DELETE ON project1.* TO 'project1-sensor'@'localhost';
-		FLUSH PRIVILEGES;
-		```
+```mysql
+CREATE USER 'project1-admin'@'localhost' IDENTIFIED BY 'adminpassword';
+CREATE USER 'project1-web'@'localhost' IDENTIFIED BY 'webpassword';
+CREATE USER 'project1-sensor'@'localhost' IDENTIFIED BY 'sensorpassword';
+```
+	2. Database aanmaken & rechten toekennen
+```mysql
+CREATE DATABASE project1;
+GRANT ALL PRIVILEGES ON project1.* to 'project1-admin'@'localhost' WITH GRANT OPTION;
+GRANT SELECT, INSERT, UPDATE, DELETE ON project1.* TO 'project1-web'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON project1.* TO 'project1-sensor'@'localhost';
+FLUSH PRIVILEGES;
+```
 	
-1. Virtual environment 
+3. Virtual environment 
 ```console 
 me@my-rpi:~ $ python3 -m pip install --upgrade pip setuptools wheel virtualenv
 me@my-rpi:~ $ mkdir project1 && cd project1
@@ -39,7 +39,7 @@ me@my-rpi:~/project1 $ source env/bin/activate
 (env)me@my-rpi:~/project1 $ python -m pip install mysql-connector-python argon2-cffi Flask Flask-HTTPAuth Flask-MySQL mysql-connector-python passlib celery
 ```
 
-1. Services
+4. Services
 ```console 
 me@my-rpi:~/project1 $ sudo cp conf/project1-*.service /etc/systemd/system/
 me@my-rpi:~/project1 $ sudo systemctl daemon-reload
@@ -74,7 +74,7 @@ Jun 04 13:16:49 my-rpi systemd[1]: Started Project 1 sensor service.
 Jun 04 13:16:49 my-rpi python[6826]: DEBUG:__main__:Saved sensor process_count=b'217\n' to database
 Jun 04 13:16:55 my-rpi python[6826]: DEBUG:__main__:Saved sensor process_count=b'218\n' to database
 
-1. nginx
+5. nginx
 me@my-rpi:~/project1 $ ls -l /etc/nginx/sites-*
 /etc/nginx/sites-available:
 total 4
