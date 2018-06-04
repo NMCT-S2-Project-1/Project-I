@@ -1,0 +1,14 @@
+[Unit]
+Description=uWSGI instance to serve project1 web interface
+After=network.target
+BindsTo=mysqld.service
+After=mysqld.service
+
+[Service]
+User=seb
+Group=www-data
+WorkingDirectory=/home/seb/project1/web
+ExecStart=/usr/bin/uwsgi --ini /home/seb/project1/conf/uwsgi-flask.ini
+
+[Install]
+WantedBy=multi-user.target
