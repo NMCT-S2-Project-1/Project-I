@@ -15,13 +15,13 @@ me@my-rpi:~ $ sudo apt install -y python3-venv python3-pip python3-mysqldb maria
 ```console 
 me@my-rpi:~ $ sudo mariadb
 ```
-	1. Users aanmaken
+  1. Users aanmaken
 ```mysql
 CREATE USER 'project1-admin'@'localhost' IDENTIFIED BY 'adminpassword';
 CREATE USER 'project1-web'@'localhost' IDENTIFIED BY 'webpassword';
 CREATE USER 'project1-sensor'@'localhost' IDENTIFIED BY 'sensorpassword';
 ```
-	2. Database aanmaken & rechten toekennen
+  2. Database aanmaken & rechten toekennen
 ```mysql
 CREATE DATABASE project1;
 GRANT ALL PRIVILEGES ON project1.* to 'project1-admin'@'localhost' WITH GRANT OPTION;
