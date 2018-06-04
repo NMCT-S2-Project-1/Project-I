@@ -11,7 +11,6 @@ me@my-rpi:~ $ sudo apt install -y python3-venv python3-pip python3-mysqldb maria
 
 ## Database setup
 ```console 
-me@my-rpi:~ $ sudo mariadb
 me@my-rpi:~ $ sudo systemctl status mysql
 ● mariadb.service - MariaDB database server
    Loaded: loaded (/lib/systemd/system/mariadb.service; enabled; vendor preset: enabled)
@@ -31,6 +30,10 @@ me@my-rpi:~ $ ss -ltn
 ```
 
 ### Users aanmaken
+```console 
+me@my-rpi:~ $ sudo mariadb
+```
+
 ```mysql
 CREATE USER 'project1-admin'@'localhost' IDENTIFIED BY 'adminpassword';
 CREATE USER 'project1-web'@'localhost' IDENTIFIED BY 'webpassword';
@@ -38,6 +41,7 @@ CREATE USER 'project1-sensor'@'localhost' IDENTIFIED BY 'sensorpassword';
 ```
 
 ### Database aanmaken & rechten toekennen
+
 ```mysql
 CREATE DATABASE project1;
 GRANT ALL PRIVILEGES ON project1.* to 'project1-admin'@'localhost' WITH GRANT OPTION;
