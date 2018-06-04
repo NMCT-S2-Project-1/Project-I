@@ -1,9 +1,7 @@
 # Project I
 Voorbeeld voor Project I
 
-## Raspberry Pi
-
-1. Packages installeren
+## Packages installeren
 ```console 
 me@my-rpi:~ $ sudo apt update 
 me@my-rpi:~ $ sudo apt install -y python3-venv python3-pip python3-mysqldb mariadb-server uwsgi nginx uwsgi-plugin-python3 rabbitmq-server
@@ -11,17 +9,35 @@ me@my-rpi:~ $ sudo apt install -y python3-venv python3-pip python3-mysqldb maria
 
 > Vervang als je wil mariadb-server door mysql-server. In wat volgt moet je dan ook telkens mariadb vervangen door mysql.
 
-2. Database setup
+## Database setup
 ```console 
 me@my-rpi:~ $ sudo mariadb
+me@my-rpi:~ $ sudo systemctl status mysql
+● mariadb.service - MariaDB database server
+   Loaded: loaded (/lib/systemd/system/mariadb.service; enabled; vendor preset: enabled)
+   Active: active (running) since Sun 2018-06-03 09:41:18 CEST; 1 day 4h ago
+ Main PID: 781 (mysqld)
+   Status: "Taking your SQL requests now..."
+    Tasks: 28 (limit: 4915)
+   CGroup: /system.slice/mariadb.service
+           └─781 /usr/sbin/mysqld
+
+Jun 03 09:41:13 rpr-stretch-vm systemd[1]: Starting MariaDB database server...
+Jun 03 09:41:15 rpr-stretch-vm mysqld[781]: 2018-06-03  9:41:15 4144859136 [Note] /usr/sbin/mysqld (mysqld 10.1.26-MariaDB-0+deb9u1)
+Jun 03 09:41:18 rpr-stretch-vm systemd[1]: Started MariaDB database server.
+
+me@my-rpi:~ $ ss -ltn
+
 ```
-  1. Users aanmaken
+
+### Users aanmaken
 ```mysql
 CREATE USER 'project1-admin'@'localhost' IDENTIFIED BY 'adminpassword';
 CREATE USER 'project1-web'@'localhost' IDENTIFIED BY 'webpassword';
 CREATE USER 'project1-sensor'@'localhost' IDENTIFIED BY 'sensorpassword';
 ```
-  2. Database aanmaken & rechten toekennen
+
+### Database aanmaken & rechten toekennen
 ```mysql
 CREATE DATABASE project1;
 GRANT ALL PRIVILEGES ON project1.* to 'project1-admin'@'localhost' WITH GRANT OPTION;
@@ -30,7 +46,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON project1.* TO 'project1-sensor'@'localho
 FLUSH PRIVILEGES;
 ```
 	
-3. Virtual environment 
+## Python virtual environment 
 ```console 
 me@my-rpi:~ $ python3 -m pip install --upgrade pip setuptools wheel virtualenv
 me@my-rpi:~ $ mkdir project1 && cd project1
@@ -39,7 +55,7 @@ me@my-rpi:~/project1 $ source env/bin/activate
 (env)me@my-rpi:~/project1 $ python -m pip install mysql-connector-python argon2-cffi Flask Flask-HTTPAuth Flask-MySQL mysql-connector-python passlib celery
 ```
 
-4. Services
+## Services
 ```console 
 me@my-rpi:~/project1 $ sudo cp conf/project1-*.service /etc/systemd/system/
 me@my-rpi:~/project1 $ sudo systemctl daemon-reload
@@ -74,7 +90,7 @@ Jun 04 13:16:49 my-rpi systemd[1]: Started Project 1 sensor service.
 Jun 04 13:16:49 my-rpi python[6826]: DEBUG:__main__:Saved sensor process_count=b'217\n' to database
 Jun 04 13:16:55 my-rpi python[6826]: DEBUG:__main__:Saved sensor process_count=b'218\n' to database
 
-5. nginx
+## nginx
 me@my-rpi:~/project1 $ ls -l /etc/nginx/sites-*
 /etc/nginx/sites-available:
 total 4
