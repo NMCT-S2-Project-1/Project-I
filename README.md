@@ -20,12 +20,12 @@ me@my-rpi:~/project1 $ source env/bin/activate
 (env)me@my-rpi:~/project1 $ python -m pip install mysql-connector-python argon2-cffi Flask Flask-HTTPAuth Flask-MySQL mysql-connector-python passlib
 ```
 
-### PyCharm
+### Startproject clonen
 - Ga naar `VCS > Import from Version Control > GitHub` en clone het startproject (dit dus - <https://github.com/NMCT-S2-Project-I/Project-I.git>).
-- Stel de deployment config in voor de directory die je daarnet gemaakt hebt, bv. `/home/me/project1`. **Klik op Apply.**
+- Stel de deployment config in voor de directory die je daarnet gemaakt hebt, bv. `/home/me/project1`. **Klik op Apply!**
 - Ga naar de interpreter settings en configureer/kies het virtual environment dat je net gemaakt hebt, bv. `/home/me/project1/env/bin/python`.
-- Check dat het de interpreter het veld `Path mapping` juist staat.
-- Upload de hele boel vanuit PyCharm naar de Pi en verifieer; het zou er nu zo moeten uitzien:
+- Check dat onder de interpreter het veld `Path mapping` ingevuld is en naar de juiste directory verwijst.
+- Upload nu de hele boel vanuit PyCharm naar de Pi en verifieer; het zou er nu zo moeten uitzien:
 
 ```console
 me@my-rpi:~ $ ls -l project1/
@@ -85,7 +85,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON project1.* TO 'project1-sensor'@'localho
 FLUSH PRIVILEGES;
 ```
 
-*For the lazy*: Bovenstaande SQL-statements staan ook in [sql/db_init.sql](sql/db_init.sql), dus:
+*For the lazy:* Bovenstaande SQL-statements staan ook in [sql/db_init.sql](sql/db_init.sql), dus:
 
 ```console
 me@my-rpi:~/project1 $ sudo mariadb < sql/db_init.sql
