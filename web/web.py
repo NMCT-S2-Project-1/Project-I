@@ -1,6 +1,7 @@
 import logging
 
-from flask import Flask, g, request, abort, flash, render_template
+import jwt
+from flask import Flask, g, request, abort, flash, render_template, session, redirect, url_for
 from flaskext.mysql import MySQL
 from flask_httpauth import HTTPBasicAuth
 from passlib import pwd
@@ -62,33 +63,50 @@ def set_data(sql, params=None):
     return True
 
 
-def add_user(login, password):
+def add_user(user, password):
     try:
-        if get_data('SELECT phcstring FROM project1.users WHERE userid=%s', (login,)):
-            message = 'User {} exists!'.format(login)
+        if get_data('SELECT phcstring FROM project1.users WHERE userid=%s', (user,)):
+            message = 'User {} exists!'.format(user)
             log.info(message)
             return False, message
 
         argon_hash = argon2.hash(password)
-        if set_data('INSERT INTO project1.users (userid, phcstring) VALUES (%s, %s);', (login, argon_hash)):
-            message = 'Added user {}'.format(login)
+        if set_data('INSERT INTO project1.users (userid, phcstring) VALUES (%s, %s);', (user, argon_hash)):
+            message = 'Added user {}'.format(user)
             log.info(message)
             return True, message
 
     except Exception as e:
-        message = 'Error adding user {}: {}'.format(login, e)
+        message = 'Error adding user {}: {}'.format(user, e)
         log.error(message)
         return False, message
 
 
+def decode_token():
+    token = session.get('auth_token')
+    if token:
+        try:
+            return jwt.decode(token, app.secret_key)
+        except Exception as e:
+            log.exception(e)
+            return None
+
+
 @auth.verify_password
 def verify_credentials(login, password):
+    if decode_token():
+        log.debug("Authenticated by token")
+        return True
     record = get_data('SELECT phcstring FROM project1.users WHERE userid=%s', (login,))
     if not record:
         return False
     authorized = argon2.verify(password, record[0][0])
     if authorized:
-        g.user = login
+        session['auth_token'] = jwt.encode(
+            {'user': login},
+            app.secret_key,
+        )
+        # g.user = login
     return authorized
 
 
@@ -100,7 +118,23 @@ def hello_world():
 @app.route('/secure')
 @auth.login_required
 def secure():
-    return 'Hello, {}!'.format(g.user)
+    auth_data = decode_token()
+    if not auth_data:
+        abort(403)
+    return 'Hello, {}!'.format(auth_data.get('user'))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        user = request.form.get('user')
+        password = request.form.get('password')
+        if not user and password:
+            abort(400)
+        if verify_credentials(user, password):
+            return redirect(url_for('secure'))
+        flash("Authentication failed")
+    return render_template('login.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
