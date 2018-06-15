@@ -232,3 +232,56 @@ Op het eind moet je dan enkel je services nog activeren in *systemd*...
 me@my-rpi:~/project1 $ sudo systemctl enable project1-*
 ```
 ... en checken of na een reboot effectief alles goed werkt.
+
+
+# Troubleshooting 
+
+## General
+
+- Met `journalctl` kan je in de logfiles kijken. Daar komt ook stdout in terecht (eventuele console output/foutboodschappen/stack traces) van je services/scripts terecht.
+- Die logs komen uit de *syslog* en die kan je live volgen met `tail -f /var/log/syslog'
+- Met `ss -ltn` kan je zien op welke TCP-poorten geluisterd wordt/services draaien. *:123 wil zeggen elk IPv4 adres, [::]:123 hetzelfde maar voor IPv4+IPv6, 127.0.0.1:123 wil zeggen ENKEL toegankelijk vanop de pi zelf/via SSH.
+
+## Nginx
+
+**Configuratie testen:**
+```console
+me@my-rpi:~ $ sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+**Address already in use** in de log en/of `systemctl status`: Er draait al iets op poort 80! Wellicht een apache2 httpd die we bij CNW eens geïnstalleerd hebben. `systemctl {stop|disable}` om uit te zetten, `apt purge apache2` voor uninstall.
+
+**HTTP/502 Bad Gateway**: nginx geraakt niet tot bij uWSGI -> draait de flask service wel? Klopt het socket-bestand in de nginx-config? (Dubbel)check of dat bestand wel bestaat en doe dat m.b.v. een copy/paste van het pad uit de config. 
+
+**Welcome to nginx** startpagina in je browser? `default` config van nginx is nog actief i.p.v. de jouwe - heb je de config goed gezet in `sites-available` EN ernaar gelinkt in `sites-enabled`?
+
+## systemd/services
+**CHROOT** wil zeggen dat `WorkingDirectory` niet klopt/bestaat.
+**EXEC** wil zeggen dat `ExecStart` niet klopt/bestaat/meteen crashed.
+**zagen over mysqld** betekent dat je ofwel geen mysql hebt, of meer waarschijnlijk dat die om de een of andere een andere naam heeft
+Debugging, a.k.a. **doe eens stap-voor-stap want systemd probeert en zie waar het fout gaat:** 
+```console
+me@my-rpi:~ $ systemctl status project1-flask
+● project1-flask.service - uWSGI instance to serve project1 web interface
+   Loaded: loaded (/etc/systemd/system/project1-flask.service; enabled; vendor preset: enabled)
+   Active: failed (Result: signal) since Thu 2018-06-14 20:51:03 CEST; 3h 1min ago
+  Process: 6137 ExecStart=/usr/bin/uwsgi --ini /home/me/project1/conf/uwsgi-flask.ini (code=killed, signal=ABRT)
+ Main PID: 6137 (code=killed, signal=ABRT)
+#	[...]
+	
+# COPY/PASTE de unit file van op de regel die begint met 'Loaded:'...
+me@my-rpi:~ $ cat /etc/systemd/system/project1-flask.service
+#	[...]
+[Service]
+User=me
+Group=www-data
+WorkingDirectory=/home/me/project1/web
+ExecStart=/usr/bin/uwsgi --ini /home/me/project1/conf/uwsgi-flask.ini
+#	[...]
+me@my-rpi:~ $ su - me							# User=me
+me@my-rpi:~ $ cd /home/me/project1/web			# WorkingDirectory=/home/me/project1/web
+me@my-rpi:~/project1/web $ /usr/bin/uwsgi --ini /home/me/project1/conf/uwsgi-flask.ini 
+# Die laatste is de VOLLEDIGE regel die volgt op ExecStart
+
+```
