@@ -104,7 +104,7 @@ def get_networks():
 def get_system_properties():
     status = None
     host = cmd_output('/bin/hostname')
-    boot_ip = cmd_match('cat /boot/cmdline.txt 2>/dev/null', re.compile('ip=(?P<ip>\w+)'))
+    boot_ip = cmd_match('cat /boot/cmdline.txt 2>/dev/null', re.compile('ip=(?P<ip>[\w.]+)'))
     status = True
     globals().update(locals())
     return locals()
