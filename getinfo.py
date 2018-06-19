@@ -184,7 +184,7 @@ def get_app_credentials():
 def save_to_file(data, file='about.yml', mode='a'):
     try:
         with open(file, mode) as f:
-            json.dump(data, f)
+            json.dump(data, f, indent=4)
         print('{} data to {}'.format('Appended' if mode == 'a' else 'Wrote', file))
         return True
     except Exception as e:
@@ -193,7 +193,7 @@ def save_to_file(data, file='about.yml', mode='a'):
 
 
 def output_results(data):
-    print('\n\n', LINE, 'Output data', LINE, json.dumps(data, indent=4), LINE, sep='\n')
+    print('\n\n', LINE, 'Output data', LINE, json.dumps(data), LINE, sep='\n')
     ok = save_to_file(data, 'info.json', 'w')
 
 
