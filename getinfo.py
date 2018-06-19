@@ -1,4 +1,3 @@
-
 import base64
 import grp
 import json
@@ -10,7 +9,6 @@ import subprocess
 import sys
 from getpass import getpass, getuser
 from ipaddress import IPv4Interface, IPv6Interface
-
 
 API_URL = 'https://'
 LOCALHOST = IPv4Interface('127.0.0.1/32')
@@ -102,12 +100,12 @@ def get_networks():
 
 
 def get_system_properties():
-    status = None
-    host = cmd_output('/bin/hostname')
-    boot_ip = cmd_match('cat /boot/cmdline.txt 2>/dev/null', re.compile('ip=(?P<ip>[\w.]+)'))
-    status = True
-    globals().update(locals())
-    return locals()
+    sysinfo = {}
+    sysinfo.update(host=cmd_output('/bin/hostname'))
+    sysinfo.update(boot_ip=cmd_match('cat /boot/cmdline.txt 2>/dev/null', re.compile('ip=(?P<ip>[\w.]+)')))
+    with open('/etc/machine-id') as f:
+        sysinfo.update(machine_id=f.read().strip())
+    return sysinfo
 
 
 def get_python():
